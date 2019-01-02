@@ -1,0 +1,55 @@
+{
+  "name": "Refresh & Hunt",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Search word on page and refresh it if it not found. Nazarov A.A., Orenburg, 2018",
+  "homepage_url": "http://github.com/artnazarov",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "scripts": [
+      "src/bg/background.js"
+    ],
+    "persistent": true
+  },
+  "permissions": [
+    "bookmarks",
+    "chrome://favicon/",
+    "clipboardRead",
+    "clipboardWrite",
+    "contentSettings",
+    "contextMenus",
+    "cookies",
+    "tts",
+    "ttsEngine",
+    "history",
+    "idle",
+    "management",
+    "notifications",
+    "tabs",
+    "geolocation",
+    "https://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*"
+      ],
+      "css": [
+        "src/inject/inject.css"
+      ]
+    },
+    {
+      "matches": [
+        "https://*/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ]
+    }
+  ]
+}
