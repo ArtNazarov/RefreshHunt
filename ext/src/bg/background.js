@@ -19,7 +19,13 @@ chrome.extension.onMessage.addListener(
       
       if (request.method == "sync_words"){
               console.log('send to inject.js...');
-              sendResponse({words: localStorage.getItem('words')});
+              sendResponse({words: JSON.parse( localStorage.getItem('words'))});
+      }
+      else if (request.method == "play_beep"){
+         var Elem = document.createElement("audio");
+          Elem.src="/src/beep.wav";
+          Elem.play();
+          
       }
       else
       sendResponse();
@@ -27,5 +33,5 @@ chrome.extension.onMessage.addListener(
   };}
 );
 function setWords(words) {
-    localStorage.setItem('words', words);
+    localStorage.setItem('words', JSON.stringify( words ) );
 };

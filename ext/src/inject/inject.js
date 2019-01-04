@@ -1,6 +1,6 @@
 chrome.runtime.sendMessage({method: "sync_words"}, function(response) {
   console.log('sync '+response.words);
-  localStorage.setItem('words', response.words);
+  localStorage.setItem('words', JSON.stringify(response.words));
 });
 
 chrome.extension.sendMessage({}, function(response) {
@@ -14,23 +14,33 @@ chrome.extension.sendMessage({}, function(response) {
 		console.log("(C) Refresh & Hunt");
 		// ----------------------------------------------------------
   
-  
-  var setting = localStorage.getItem('words');
-  var words = setting.split(",");          
+  console.log( localStorage.getItem('words') );
+  var words = JSON.parse( localStorage.getItem('words') );
+  console.log(words);
           
             function testWords(){
               var found = false;
+              var index = -1;
                 for (var i=0;i<words.length;i++){
                   if (document.documentElement.innerHTML.indexOf(words[i])>0){
                     found = true;
+                    console.log('Найдено:'+words[i]);
+                    index = i;
                     break;
                   }
                 }
-              return found;
+              return { found : found, index : index };
             }
-  
-            if (testWords()){
-              alert('OK, STOP REFRESHING')
+            var searchResults = testWords();
+            if (searchResults.found){
+             
+              var notice = 'Найдено '+words[searchResults.index];
+              
+              chrome.runtime.sendMessage({method: "play_beep", notice : notice}, function(response) {
+              console.log('Play beep');
+              alert(notice);
+              });
+              
             }
               else
             {
