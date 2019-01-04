@@ -1,3 +1,103 @@
+/*
+ * Takes in an array of consecutive TextNodes and returns a document fragment with `word` highlighted
+ */
+function highlight_text_nodes($nodes, word) {
+    if (!$nodes.length) {
+        return;
+    }
+
+    var text = '';
+
+    // Concatenate the consecutive nodes to get the actual text
+    for (var i = 0; i < $nodes.length; i++) {
+        text += $nodes[i].textContent;
+    }
+
+    var $fragment = document.createDocumentFragment();
+
+    while (true) {
+        // Tweak this if you want to change the highlighting behavior
+        var index = text.toLowerCase().indexOf(word.toLowerCase());
+
+        if (index === -1) {
+            break;
+        }
+
+        // Split the text into [before, match, after]
+        var before = text.slice(0, index);
+        var match = text.slice(index, index + word.length);
+        text = text.slice(index + word.length);
+
+        // Create the <mark>
+        var $mark = document.createElement('mark');
+        $mark.className = 'found';
+        $mark.appendChild(document.createTextNode(match));
+
+        // Append it to the fragment
+        $fragment.appendChild(document.createTextNode(before));
+        $fragment.appendChild($mark);
+    }
+
+    // If we have leftover text, just append it to the end
+    if (text.length) {
+        $fragment.appendChild(document.createTextNode(text));
+    }
+
+    // Replace the nodes with the fragment
+    $nodes[0].parentNode.insertBefore($fragment, $nodes[0]);
+
+    for (var i = 0; i < $nodes.length; i++) {
+        var $node = $nodes[$nodes.length - i - 1];
+        $node.parentNode.removeChild($node);
+    }
+}
+
+
+/*
+ * Highlights all instances of `word` in `$node` and its children
+ */
+function highlight($node, word) {
+    var $children = $node.childNodes;
+    var $current_run = [];
+
+    for (var i = 0; i < $children.length; i++) {
+        var $child = $children[i];
+
+        if ($child.nodeType === Node.TEXT_NODE) {
+            // Keep track of consecutive text nodes
+            $current_run.push($child);
+        } else {
+            // If we hit a regular element, highlight what we have and start over
+            highlight_text_nodes($current_run, word);
+            $current_run = [];
+
+            // Ignore text inside of our <mark>s
+            if ($child.nodeType === Node.ELEMENT_NODE && $child.className !== 'found') {
+                highlight($child, word);
+            }
+        }
+    }
+
+    // Just in case we have only text nodes as children
+    if ($current_run.length) {
+        highlight_text_nodes($current_run, word);
+    }
+}
+
+/*
+ * Removes all highlighted <mark>s from the given node
+ */
+function unhighlight($node) {
+    var $marks = [].slice.call($node.querySelectorAll('mark.found'));
+
+    for (var i = 0; i < $marks.length; i++) {
+        var $mark = $marks[i];
+
+        // Replace each <mark> with just a text node of its contents
+        $mark.parentNode.replaceChild(document.createTextNode($mark.childNodes[0].textContent), $mark);
+    }
+}
+
 chrome.runtime.sendMessage({method: "sync_words"}, function(response) {
   console.log('sync '+response.words);
   localStorage.setItem('words', JSON.stringify(response.words));
@@ -38,6 +138,11 @@ chrome.extension.sendMessage({}, function(response) {
               
               chrome.runtime.sendMessage({method: "play_beep", notice : notice}, function(response) {
               console.log('Play beep');
+              
+              
+             highlight(document.getElementsByTagName("body")[0], words[searchResults.index]);
+              
+              
               alert(notice);
               });
               
