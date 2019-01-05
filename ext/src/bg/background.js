@@ -17,7 +17,11 @@ chrome.extension.onMessage.addListener(
         });
     break;}
     default : {
-      if (request.method == "sync_period"){
+      if (request.method == "sync_location"){
+              console.log('send to inject.js...');
+              sendResponse({location: localStorage.getItem('location')});
+      } 
+      else if (request.method == "sync_period"){
               console.log('send to inject.js...');
               sendResponse({period: localStorage.getItem('period')});
       }
@@ -42,4 +46,9 @@ function setWords(words) {
 
 function setPeriod(period){
   localStorage.setItem('period', period );
+}
+
+
+function setLocation(location){
+  localStorage.setItem('location', location );
 }

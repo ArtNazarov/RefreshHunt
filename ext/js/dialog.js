@@ -5,10 +5,13 @@ document.forms[0].onsubmit = function(e) {
     var uiPeriod = document.getElementById('period');
     var period = uiPeriod[uiPeriod.selectedIndex].value;
     
+    var url = document.getElementById("location").value;
+    
     chrome.runtime.getBackgroundPage(function(bgWindow) {
       // sync values with inject.js storage
         bgWindow.setWords(words);
         bgWindow.setPeriod(period);
+        bgWindow.setLocation(url);
         console.log('Options saved');
         window.close();     // Close dialog
     });
@@ -27,4 +30,5 @@ document.addEventListener("DOMContentLoaded", function(){
        document.getElementById('period').selectedIndex = 0; break;
      }
    };
+   document.getElementById("location").value = localStorage.getItem("location");
 });

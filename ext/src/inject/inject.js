@@ -104,18 +104,34 @@ function unhighlight($node) {
 /* SYNC OPTIONS */
 
 chrome.runtime.sendMessage({method: "sync_words"}, function(response) {
-  console.log('sync '+response.words);
+  console.log('sync words '+JSON.stringify(response.words));
   localStorage.setItem('words', JSON.stringify(response.words));
 });
 
 chrome.runtime.sendMessage({method: "sync_period"}, function(response) {
-  console.log('sync '+response.period);
+  console.log('sync period '+response.period);
   localStorage.setItem('period', response.period);
 });
 
+chrome.runtime.sendMessage({method: "sync_location"}, function(response) {
+  console.log('sync location '+response.location);
+  localStorage.setItem('location', response.location);
+});
+
+
 /* MAIN */
+ var url = localStorage.getItem("location");
+
+ console.log('Current location:'+document.location.href);
+ console.log('Allowed location:'+url);
+if (url === document.location.href){ 
 
 chrome.extension.sendMessage({}, function(response) {
+ 
+  
+
+  
+  
 	var readyStateCheckInterval = setInterval(function() {
     
 	if (document.readyState === "complete") {
@@ -134,7 +150,8 @@ chrome.extension.sendMessage({}, function(response) {
   var period = localStorage.getItem('period');
   if (period<25000){period=25000};
   console.log(period);
-          
+
+    
             function testWords(){
               var found = false;
               var index = -1;
@@ -174,7 +191,11 @@ chrome.extension.sendMessage({}, function(response) {
           
         }, 3000);
   
+ 
   
   
-  
-});
+}); 
+
+console.log('location ok');
+
+ } else { console.log('NOT ALLOWED!'); };
