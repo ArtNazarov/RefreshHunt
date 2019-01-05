@@ -1,3 +1,4 @@
+ 
 chrome.extension.onMessage.addListener(
   function(request, sender, sendResponse) {
    switch(request) {
@@ -16,8 +17,11 @@ chrome.extension.onMessage.addListener(
         });
     break;}
     default : {
-      
-      if (request.method == "sync_words"){
+      if (request.method == "sync_period"){
+              console.log('send to inject.js...');
+              sendResponse({period: localStorage.getItem('period')});
+      }
+      else if (request.method == "sync_words"){
               console.log('send to inject.js...');
               sendResponse({words: JSON.parse( localStorage.getItem('words'))});
       }
@@ -35,3 +39,7 @@ chrome.extension.onMessage.addListener(
 function setWords(words) {
     localStorage.setItem('words', JSON.stringify( words ) );
 };
+
+function setPeriod(period){
+  localStorage.setItem('period', period );
+}

@@ -1,3 +1,6 @@
+
+
+
 /*
  * Takes in an array of consecutive TextNodes and returns a document fragment with `word` highlighted
  */
@@ -98,10 +101,19 @@ function unhighlight($node) {
     }
 }
 
+/* SYNC OPTIONS */
+
 chrome.runtime.sendMessage({method: "sync_words"}, function(response) {
   console.log('sync '+response.words);
   localStorage.setItem('words', JSON.stringify(response.words));
 });
+
+chrome.runtime.sendMessage({method: "sync_period"}, function(response) {
+  console.log('sync '+response.period);
+  localStorage.setItem('period', response.period);
+});
+
+/* MAIN */
 
 chrome.extension.sendMessage({}, function(response) {
 	var readyStateCheckInterval = setInterval(function() {
@@ -114,9 +126,14 @@ chrome.extension.sendMessage({}, function(response) {
 		console.log("(C) Refresh & Hunt");
 		// ----------------------------------------------------------
   
+ 
+  
   console.log( localStorage.getItem('words') );
-  var words = JSON.parse( localStorage.getItem('words') );
+  var words = JSON.parse( localStorage.getItem('words') ) || ['something'];
   console.log(words);
+  var period = localStorage.getItem('period');
+  if (period<25000){period=25000};
+  console.log(period);
           
             function testWords(){
               var found = false;
@@ -135,13 +152,10 @@ chrome.extension.sendMessage({}, function(response) {
             if (searchResults.found){
              
               var notice = 'Найдено '+words[searchResults.index];
+              highlight(document.getElementsByTagName("body")[0], words[searchResults.index]);
               
               chrome.runtime.sendMessage({method: "play_beep", notice : notice}, function(response) {
               console.log('Play beep');
-              
-              
-             highlight(document.getElementsByTagName("body")[0], words[searchResults.index]);
-              
               
               alert(notice);
               });
@@ -149,9 +163,11 @@ chrome.extension.sendMessage({}, function(response) {
             }
               else
             {
+              console.log('reload after ' + period +  ' millisec');
               setTimeout( ()=>{
+                console.log('reloading');
                 document.location.reload(true);
-            }, 25000);
+            }, period);
             }
         };
 	
