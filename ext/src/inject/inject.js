@@ -155,21 +155,25 @@ chrome.extension.sendMessage({}, function(response) {
             function testWords(){
               var found = false;
               var index = -1;
+              var list = [];
                 for (var i=0;i<words.length;i++){
                   if (document.documentElement.innerHTML.indexOf(words[i])>0){
                     found = true;
                     console.log('Найдено:'+words[i]);
                     index = i;
-                    break;
+                    list.push(words[i]);
                   }
                 }
-              return { found : found, index : index };
+              return { found : found, index : index, list : list };
             }
             var searchResults = testWords();
             if (searchResults.found){
-             
-              var notice = 'Найдено '+words[searchResults.index];
-              highlight(document.getElementsByTagName("body")[0], words[searchResults.index]);
+              console.log(searchResults.list);
+              var notice = 'Найдено '+searchResults.list.join("\n");
+              for (var i=0;i<searchResults.list.length;i++){
+                highlight(document.getElementsByTagName("body")[0], searchResults.list[i]); 
+                };
+              
               
               chrome.runtime.sendMessage({method: "play_beep", notice : notice}, function(response) {
               console.log('Play beep');
